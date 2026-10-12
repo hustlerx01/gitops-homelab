@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: hello, labels: {app: hello}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: hello}}
+  template:
+    metadata: {labels: {app: hello}}
+    spec:
+      securityContext: {runAsNonRoot: true, runAsUser: 65532, seccompProfile: {type: RuntimeDefault}}
+      automountServiceAccountToken: false
+      containers:
+        - name: hello
+          image: gcr.io/google-samples/hello-app:2.0
+          ports: [{containerPort: 8080}]
+          resources: {requests: {cpu: 10m, memory: 32Mi}, limits: {memory: 64Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          readinessProbe: {httpGet: {path: /, port: 8080}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: hello}
+spec:
+  selector: {app: hello}
+  ports: [{port: 80, targetPort: 8080}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: default-deny}
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: allow-ingress-8080}
+spec:
+  podSelector: {matchLabels: {app: hello}}
+  policyTypes: [Ingress]
+  ingress: [{ports: [{port: 8080}]}]

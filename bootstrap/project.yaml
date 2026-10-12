@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata: {name: homelab, namespace: argocd}
+spec:
+  description: Homelab security stack - restricted to this repo + pinned Helm repos
+  sourceRepos:
+    - https://github.com/ansarshaikh/gitops-homelab.git
+    - https://kyverno.github.io/kyverno/
+    - https://aquasecurity.github.io/helm-charts/
+    - https://prometheus-community.github.io/helm-charts
+    - https://bitnami.github.io/sealed-secrets
+  destinations:
+    - {server: https://kubernetes.default.svc, namespace: "*"}
+  clusterResourceWhitelist:
+    - {group: "", kind: Namespace}
+    - {group: apiextensions.k8s.io, kind: CustomResourceDefinition}
+    - {group: rbac.authorization.k8s.io, kind: ClusterRole}
+    - {group: rbac.authorization.k8s.io, kind: ClusterRoleBinding}
+    - {group: admissionregistration.k8s.io, kind: "*"}
+    - {group: kyverno.io, kind: ClusterPolicy}
+    - {group: aquasecurity.github.io, kind: "*"}
+  orphanedResources: {warn: true}
