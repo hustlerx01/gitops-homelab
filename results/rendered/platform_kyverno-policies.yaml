@@ -1,0 +1,22 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+spec:
+  background: true
+  rules:
+  - match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          namespaces:
+          - hello
+    name: require-tag
+    validate:
+      message: Pin image tags.
+      pattern:
+        spec:
+          containers:
+          - image: '!*:latest'
+  validationFailureAction: Audit
