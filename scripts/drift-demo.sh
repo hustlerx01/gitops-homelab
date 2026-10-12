@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# NOT RUN on the authoring box (no Docker/kind). Shows ArgoCD selfHeal reverting manual drift.
+# NOT RUN on the authoring machine (no Docker/kind). Shows ArgoCD selfHeal reverting manual drift.
 set -euo pipefail
 kind create cluster --name homelab
 kubectl create ns argocd
